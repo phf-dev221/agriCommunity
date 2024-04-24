@@ -28,8 +28,8 @@ class ProductRequest extends FormRequest
             'location' => 'required|string',
             'status' => 'string', 
             'sous_category_id' => 'required|exists:sous_categories,id',
-            'user_id' => 'required|exists:users,id',
-            "image" => ['required', 'image', 'mimes:png,jpeg,jpg' ]
+            'image' => 'required|array',
+            'image.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048', 
 
 
 

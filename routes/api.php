@@ -1,13 +1,14 @@
 <?php
 
+use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\ApiController;
+use App\Http\Controllers\ProductController;
 use App\Http\Controllers\API\RoleController;
 use App\Http\Controllers\CategoryController;
-use App\Http\Controllers\ProductController;
-use App\Http\Controllers\SousCategoryController;
 use App\Http\Middleware\isSuperAdminMiddleware;
 
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\SousCategoryController;
+use App\Http\Controllers\ForgetPasswordController;
 
 
 /*
@@ -17,7 +18,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::post('register', [ApiController::class, 'register']);
-Route::post('login', [ApiController::class, 'login']);
+Route::post('login', [ApiController::class, 'login'])->name('login');
 //Route protected 
 Route::group(['middleware' => 'auth:api'], function () {
     Route::get('logout', [ApiController::class, 'logout']);
@@ -29,11 +30,25 @@ Route::group(['middleware' => 'auth:api'], function () {
 Route::apiResource('role', RoleController::class)->middleware('superAdmin');
 Route::apiResource('category', CategoryController::class)->middleware('superAdmin');
 Route::apiResource('sous-category', SousCategoryController::class)->middleware('superAdmin');
-Route::apiResource('product', ProductController::class)->middleware('auth:api');
 
+Route::middleware('auth:api')->group(function () {
+    // Routes pour la ressource Product
+    Route::get('product', [ProductController::class, 'index']);
+    Route::get('product/{product}', [ProductController::class, 'show']);
+    Route::post('product', [ProductController::class, 'store']);
+    Route::post('product/{product}', [ProductController::class, 'updat']);
+    Route::delete('product/{product}', [ProductController::class, 'destroy']);
+});
 
-Route::get('loginin', function (){
-return response()->json([
-    'error' => 'Unauthenticated',
-], 404);
-})->name('login');
+/*reset password*/
+// Route::get('forget-password', [ForgotPasswordController::class, 'showForgetPasswordForm'])->name('forget.password.get');
+Route::get('reset-password/{token}', [ForgetPasswordController::class, 'showResetPasswordForm'])->name('reset.password.get');
+Route::post('reset-password', [ForgetPasswordController::class, 'submitResetPasswordForm'])->name('reset.password.post');
+Route::post('forget-password', [ForgetPasswordController::class, 'submitForgetPasswordForm'])->name('forget.password.post');
+Route::get('/password/reset/success', [ForgetPasswordController::class,'showResetPasswordSuccess'])->name('password.reset.success');
+
+// Route::get('loginin', function (){
+// return response()->json([
+//     'error' => 'Unauthenticated',
+// ], 404);
+// })->name('login');

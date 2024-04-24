@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Image;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use App\Http\Requests\ProductRequest;
-use App\Models\Image;
+use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
 {
@@ -42,41 +43,54 @@ class ProductController extends Controller
     public function store(ProductRequest $request)
     {
 
-        $product = Product::create([
+        $product = new Product([
             'name' => $request->name,
             'location' => $request->location,
             'status' => $request->status,
             'sous_category_id' => $request->sous_category_id,
-            'user_id' => $request->user_id
+            'user_id' => auth()->user()->id
         ]);
-       
-        if($product->save()){
-            foreach ($request->file('image') as $image) {
-                $images = new Image();
-                $imageName = time() . '.' . $image->getClientOriginalExtension();
-                $imagePath = public_path('images');
-                $image->move($imagePath, $imageName);
-                $images->image = 'images/' . $imageName;
-                $images->product_id = $product->id;
-                $images->save();
-    
-               
+
+        try {
+            $product->save();
+
+            $imagesData = [];
+            foreach ($request->file('image') as $file) {
+                $imageName = time() . '_' . $file->getClientOriginalName();
+                $file->move(public_path('/ProductImg'), $imageName);
+
+                $image = new Image([
+                    'name' => $imageName,
+                    'product_id' => $product->id
+                ]);
+                $image->save();
+                $imagesData[] = $image;
             }
-           
-           
+
+            if (count($imagesData) > 0) {
+                return response()->json([
+                    'message' => "Bien enregistré avec succès",
+                    'bien' => $product,
+                    'images' => $imagesData,
+                ], 201);
+            } else {
+                throw new \Exception('Aucune image enregistrée');
+            }
+        } catch (\Exception $e) {
             return response()->json([
-                'product' => $product,
-                'message' => 'Product created successfully'
-            ], 201);
+                'status_code' => 500,
+                'status_message' => 'Erreur lors de l\'enregistrement du bien : ' . $e->getMessage(),
+            ]);
         }
     }
+
 
     /**
      * Display the specified resource.
      */
     public function show(Product $product)
     {
-         return response()->json([
+        return response()->json([
             'product' => $product
         ], 200);
     }
@@ -92,14 +106,52 @@ class ProductController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(ProductRequest $request, Product $product)
+    public function updat(Request $request, Product $product)
     {
-        $product->update($request->validated());
-        return response()->json([
-            'product' => $product,
-           'message' => 'Product updated successfully'
-        ], 200);
+        // dd($request);
+        // dd($product->id);
+        try {
+
+            $product->update([
+                'name' => $request->name,
+                'location' => $request->location,
+                'status' => $request->status,
+                'sous_category_id' => $request->sous_category_id,
+            ]);
+    
+            if ($request->hasFile('image')) {
+                foreach ($product->images as $image) {
+                    Storage::delete('/ProductImg/' . $image->name);
+                    $image->delete();
+                }
+    
+                $imagesData = [];
+                foreach ($request->file('image') as $file) {
+                    $imageName = time() . '_' . $file->getClientOriginalName();
+                    $file->move(public_path('/ProductImg'), $imageName);
+    
+                    $image = new Image([
+                        'name' => $imageName,
+                        'product_id' => $product->id
+                    ]);
+                    $image->save();
+                    $imagesData[] = $image;
+                }
+            }
+    
+            return response()->json([
+                'message' => "Bien mis à jour avec succès",
+                'bien' => $product,
+                'images' => isset($imagesData) ? $imagesData : [],
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status_code' => 500,
+                'status_message' => 'Erreur lors de la mise à jour du bien : ' . $e->getMessage(),
+            ]);
+        }
     }
+    
 
     /**
      * Remove the specified resource from storage.
@@ -109,8 +161,8 @@ class ProductController extends Controller
         $product->is_deleted = true;
         $product->save();
         return response()->json([
-           
-           'message' => 'Product deleted successfully'
+
+            'message' => 'Product deleted successfully'
         ], 200);
     }
 }
