@@ -25,6 +25,7 @@ class ProductRequest extends FormRequest
     {
         return [
             'name' => 'required|string',
+            'description' => 'required|string',
             'location' => 'required|string',
             'status' => 'string', 
             'sous_category_id' => 'required|exists:sous_categories,id',

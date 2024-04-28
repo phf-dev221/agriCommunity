@@ -45,6 +45,7 @@ class ProductController extends Controller
 
         $product = new Product([
             'name' => $request->name,
+            'description' => $request->description,
             'location' => $request->location,
             'status' => $request->status,
             'sous_category_id' => $request->sous_category_id,
@@ -106,7 +107,7 @@ class ProductController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function updat(Request $request, Product $product)
+    public function update(Request $request, Product $product)
     {
         // dd($request);
         // dd($product->id);
@@ -115,6 +116,7 @@ class ProductController extends Controller
             $product->update([
                 'name' => $request->name,
                 'location' => $request->location,
+                'description' => $request->description,
                 'status' => $request->status,
                 'sous_category_id' => $request->sous_category_id,
             ]);

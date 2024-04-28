@@ -33,11 +33,11 @@ Route::apiResource('sous-category', SousCategoryController::class)->middleware('
 
 Route::middleware('auth:api')->group(function () {
     // Routes pour la ressource Product
-    Route::get('product', [ProductController::class, 'index']);
-    Route::get('product/{product}', [ProductController::class, 'show']);
-    Route::post('product', [ProductController::class, 'store']);
-    Route::post('product/{product}', [ProductController::class, 'updat']);
-    Route::delete('product/{product}', [ProductController::class, 'destroy']);
+    Route::get('product', [ProductController::class, 'index'])->name('product.index');
+    Route::get('product/{product}', [ProductController::class, 'show'])->name('product.show');
+    Route::post('product', [ProductController::class, 'store'])->name('product.store');
+    Route::post('product/{product}', [ProductController::class, 'update'])->name('product.update');
+    Route::delete('product/{product}', [ProductController::class, 'destroy'])->name('product.destroy');
 });
 
 /*reset password*/
