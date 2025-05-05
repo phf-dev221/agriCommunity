@@ -11,11 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('roles', function (Blueprint $table) {
+        Schema::create('commissions', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->text('description')->nullable();
-
+            $table->foreignId('tenant_id')->constrained()->onDelete('cascade'); // Tenant
+            $table->foreignId('payment_gateway_id')->constrained()->onDelete('cascade'); // Gateway
+            $table->decimal('rate', 5, 2); // e.g., 5.00 for 5%
             $table->timestamps();
         });
     }
@@ -25,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('roles');
+        Schema::dropIfExists('commissions');
     }
 };

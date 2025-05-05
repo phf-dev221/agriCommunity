@@ -1,6 +1,7 @@
 <?php
 
-use App\Models\Role;
+
+use App\Models\Tenant;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -12,20 +13,24 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('users', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
-            $table->string('email')->unique();
-            $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
-            $table->string('phone');
-            $table->string('address');
-            $table->boolean('isBlocked')->default(false);
-
-            $table->foreignIdFor(Role::class)->constrained();
-            $table->rememberToken();
-            $table->timestamps();
-        });
+        
+            Schema::create('users', function (Blueprint $table) {
+                $table->id();
+                $table->string('name'); // Prénom
+              
+                $table->string('email')->unique(); // E-mail
+                $table->string('password'); // Mot de passe $table->foreignId('role_id')->constrained('roles')->onDelete('cascade'); // Rôle (superadmin, etc.)
+                $table->foreignIdFor(Tenant::class)->nullable()->constrained()->onDelete('cascade'); // Tenant (null pour superadmin)
+                $table->string('address')->nullable(); // Adresse
+                $table->string('phone')->nullable(); // Téléphone
+                $table->string('google_id')->nullable();
+                $table->string('facebook_id')->nullable();
+                $table->string('avatar')->nullable();
+                $table->timestamp('email_verified_at')->nullable(); // Vérification e-mail
+                $table->rememberToken(); // Token pour "Se souvenir de moi"
+                $table->timestamps();
+            });
+    
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {
             $table->string('email')->primary();

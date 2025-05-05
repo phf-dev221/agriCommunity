@@ -9,32 +9,56 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class Product extends Model
 {
     use HasFactory;
-protected $guarded = ['id'];
 
-public function sousCategory(){
+    protected $fillable = [
+        'name', 'description', 'price', 'stock', 'status',
+        'category_id', 'sous_category_id', 'user_id', 'tenant_id',
+    ];
 
-return $this->belongsTo(SousCategory::class);
-}
+    protected $casts = [
+        'status' => 'string', // available, unavailable
+    ];
 
-public function user(){
-
-return $this->belongsTo(User::class);
-}
-
-public function images(){
-    
-    return $this->hasMany(Image::class);
+    // Relations
+    public function category()
+    {
+        return $this->belongsTo(Categorie::class);
     }
 
-        /**
-     * Write code on Method
-     *
-     * @return response()
-     */
-    protected function casts(): array
+    public function sousCategory()
     {
-        return [
-            'status' => ProductStatus::class,
-        ];
+        return $this->belongsTo(SousCategorie::class);
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function tenant()
+    {
+        return $this->belongsTo(Tenant::class);
+    }
+
+    public function images()
+    {
+        return $this->hasMany(Image::class);
+    }
+
+    public function carts()
+    {
+        return $this->belongsToMany(Cart::class, 'cart_product')
+                    ->withPivot('quantity');
+    }
+
+    public function orders()
+    {
+        return $this->belongsToMany(Order::class, 'order_product')
+                    ->withPivot('quantity', 'price');
+    }
+
+    public function discounts()
+    {
+        return $this->hasMany(Discount::class);
     }
 }

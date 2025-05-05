@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Product;
+use App\Models\Tenant;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
@@ -14,8 +15,9 @@ return new class extends Migration
     {
         Schema::create('images', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->foreignIdFor(Product::class)->constrained()->onDelete('cascade');
+            $table->string('url'); // URL ou chemin de l’image
+            $table->foreignIdFor(Product::class)->constrained()->onDelete('cascade'); // Produit
+            $table->foreignIdFor(Tenant::class)->constrained()->onDelete('cascade'); // Tenant
             $table->timestamps();
         });
     }

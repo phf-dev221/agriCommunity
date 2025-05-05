@@ -6,7 +6,7 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
-class SousCategoryRequest extends FormRequest
+class LoginRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -24,15 +24,19 @@ class SousCategoryRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "name" => ['required', 'string', 'min:2'],
-            "category_id" => ['required', 'integer']
-
-
+           
+            'identifiant' => 'required',
+            'password' => 'required',
+            
         ];
     }
-
-
-
+    public function messages()
+{
+    return [
+        'identifiant.required' => 'L\'identifiant (email ou numéro de téléphone) est obligatoire.',
+        'password.required' => 'Le mot de passe est obligatoire.',
+    ];
+}
     protected function failedValidation(Validator $validator)
     {
         $errors = $validator->errors();

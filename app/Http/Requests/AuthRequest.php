@@ -6,32 +6,29 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
-class UserRequest extends FormRequest
+class AuthRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true; // Inscription ouverte à tous
+        return true; // Tout le monde peut s'inscrire/connexion, vérifié par middleware auth:api pour login
     }
 
     public function rules(): array
     {
-
-        // Règles pour register et updateProfile
         $rules = [
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email',
-            'password' => 'required|string|min:8',
+            'password' => 'required|string|min:8|confirmed',
             'role_id' => 'required|exists:roles,id',
+            
         ];
 
-        // Pour updateProfile, rendre les champs optionnels et vérifier l'unicité sauf pour l'utilisateur actuel
-        if ($this->route()->getName() === 'updateProfile') {
-            $rules = [
-                'name' => 'sometimes|required|string|max:255',
-                'email' => 'sometimes|required|string|email|max:255|unique:users,email,' . $this->user->id,
-                'password' => 'sometimes|required|string|min:8',
-            ];
-        }
+        // if ($this->route()->getName() === 'login') {
+        //     return [
+        //         'email' => 'required|string|email',
+        //         'password' => 'required|string',
+        //     ];
+        // }
 
         return $rules;
     }
@@ -43,6 +40,8 @@ class UserRequest extends FormRequest
             'name.string' => 'Le prénom doit être une chaîne de caractères.',
             'name.max' => 'Le prénom ne doit pas dépasser 255 caractères.',
 
+           
+
             'email.required' => 'L\'email est obligatoire.',
             'email.email' => 'L\'adresse email doit être valide.',
             'email.unique' => 'Cet email est déjà utilisé.',
@@ -50,17 +49,16 @@ class UserRequest extends FormRequest
 
             'password.required' => 'Le mot de passe est obligatoire.',
             'password.min' => 'Le mot de passe doit contenir au moins 8 caractères.',
-            
+            'password.confirmed' => 'La confirmation du mot de passe ne correspond pas.',
 
             'role_id.required' => 'Le rôle est obligatoire.',
-            'role_id.exists' => 'Le rôle spécifié n\'existe pas.',
+            'role_id.exists' => 'Le rôle spécifié n\'existe pas.'
         ];
     }
 
     protected function failedValidation(Validator $validator)
     {
         throw new HttpResponseException(response()->json([
-            'success' => false,
             'errors' => $validator->errors(),
         ], 422));
     }

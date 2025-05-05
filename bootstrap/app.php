@@ -1,6 +1,8 @@
 <?php
 
+use App\Http\Middleware\AuthentificateMiddleware;
 use App\Http\Middleware\isSuperAdminMiddleware;
+
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -19,6 +21,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // ]);
         $middleware->alias([
             'superAdmin' => isSuperAdminMiddleware::class,
+            'auth-api' => AuthentificateMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
